@@ -10,7 +10,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class StatisticApp {
     /**
      * Точка входа в приложение. Запускает Spring Boot приложение.
-     * @param args аргументы командной строки
+     * @param args аргумент командной строки
      */
     public static void main(String[] args) {
         SpringApplication.run(StatisticApp.class, args);
