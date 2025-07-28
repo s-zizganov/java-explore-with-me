@@ -21,6 +21,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class StatisticController {
     /**
+     * Константа для формата даты и времени.
+     */
+    private static final String DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
+
+    /**
      * Сервис для обработки логики статистики.
      */
     private final StatisticService statisticsService;
@@ -46,8 +51,8 @@ public class StatisticController {
      */
     @GetMapping("/stats")
     public List<StatisticDto> getStats(
-            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime start,
-            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime end,
+            @RequestParam @DateTimeFormat(pattern = DATE_TIME_FORMAT) LocalDateTime start,
+            @RequestParam @DateTimeFormat(pattern = DATE_TIME_FORMAT) LocalDateTime end,
             @RequestParam(required = false) List<String> uris,
             @RequestParam(defaultValue = "false") Boolean unique) {
         log.info("Запрос получения статистики");
