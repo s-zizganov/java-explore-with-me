@@ -25,11 +25,16 @@ public class StatisticServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        HitDto hitCreateDto1 = new HitDto(null,"app1", "some uri1", "123.123.0.0", LocalDateTime.now().minusDays(1));
-        HitDto hitCreateDto2 = new HitDto(null,"app", "some uri2", "123.124.0.0", LocalDateTime.now().minusHours(2));
-        HitDto hitCreateDto3 = new HitDto(null,"app", "some uri3", "123.125.0.0", LocalDateTime.now());
-        HitDto hitCreateDto4 = new HitDto(null,"app", "some uri3", "123.126.0.0", LocalDateTime.now());
-        HitDto hitCreateDto5 = new HitDto(null,"app", "some uri3", "123.125.0.0", LocalDateTime.now());
+        HitDto hitCreateDto1 = new HitDto(null,"app1", "some uri1", "123.123.0.0",
+                LocalDateTime.now().minusDays(1));
+        HitDto hitCreateDto2 = new HitDto(null,"app", "some uri2", "123.124.0.0",
+                LocalDateTime.now().minusHours(2));
+        HitDto hitCreateDto3 = new HitDto(null,"app", "some uri3", "123.125.0.0",
+                LocalDateTime.now());
+        HitDto hitCreateDto4 = new HitDto(null,"app", "some uri3", "123.126.0.0",
+                LocalDateTime.now());
+        HitDto hitCreateDto5 = new HitDto(null,"app", "some uri3", "123.125.0.0",
+                LocalDateTime.now());
         statisticService.createHit(hitCreateDto1);
         statisticService.createHit(hitCreateDto2);
         statisticService.createHit(hitCreateDto3);
@@ -56,7 +61,8 @@ public class StatisticServiceImplTest {
     void getStats_uniqueTrueAndUrisNotEmpty_returnStatisticList() {
         List<String> uris = new ArrayList<>(List.of("some uri", "some uri3"));
 
-        List<ViewStatsDto> viewStatsDtoList = statisticService.getStats(LocalDateTime.now().minusDays(3), LocalDateTime.now(), uris, true);
+        List<ViewStatsDto> viewStatsDtoList = statisticService.getStats(LocalDateTime.now().minusDays(3),
+                LocalDateTime.now(), uris, true);
 
         assertEquals(viewStatsDtoList.size(), 1);
         assertEquals(viewStatsDtoList.get(0).getHits(), 2);
@@ -65,7 +71,8 @@ public class StatisticServiceImplTest {
     @Test
     @DisplayName("Получить Statistic unique = true, uris пуст")
     void getStats_uniqueTrueAndUrisEmpty_returnStatisticList() {
-        List<ViewStatsDto> viewStatsDtoList = statisticService.getStats(LocalDateTime.now().minusDays(3), LocalDateTime.now(), new ArrayList<>(), true);
+        List<ViewStatsDto> viewStatsDtoList = statisticService.getStats(LocalDateTime.now().minusDays(3),
+                LocalDateTime.now(), new ArrayList<>(), true);
 
         assertEquals(viewStatsDtoList.size(), 3);
         assertEquals(viewStatsDtoList.get(0).getHits(), 2);
@@ -76,7 +83,8 @@ public class StatisticServiceImplTest {
     void getStats_uniqueFalseAndUrisNotEmpty_returnStatisticList() {
         List<String> uris = new ArrayList<>(List.of("some uri", "some uri3"));
 
-        List<ViewStatsDto> viewStatsDtoList = statisticService.getStats(LocalDateTime.now().minusDays(3), LocalDateTime.now(), uris, false);
+        List<ViewStatsDto> viewStatsDtoList = statisticService.getStats(LocalDateTime.now().minusDays(3),
+                LocalDateTime.now(), uris, false);
 
         assertEquals(viewStatsDtoList.size(), 1);
         assertEquals(viewStatsDtoList.get(0).getHits(), 3);
@@ -85,7 +93,8 @@ public class StatisticServiceImplTest {
     @Test
     @DisplayName("Получить Statistic unique = false, uris пуст")
     void getStats_uniqueFalseAndUrisEmpty_returnStatisticList() {
-        List<ViewStatsDto> viewStatsDtoList = statisticService.getStats(LocalDateTime.now().minusDays(3), LocalDateTime.now(), new ArrayList<>(), false);
+        List<ViewStatsDto> viewStatsDtoList = statisticService.getStats(LocalDateTime.now().minusDays(3),
+                LocalDateTime.now(), new ArrayList<>(), false);
 
         assertEquals(viewStatsDtoList.size(), 3);
         assertEquals(viewStatsDtoList.get(0).getHits(), 3);
@@ -95,7 +104,8 @@ public class StatisticServiceImplTest {
     @DisplayName("Получить Statistic unique = false, uris пуст")
     void getStats_StartDataIsAfterEndData_returnIllegalArgumentException() {
         Exception exception = assertThrows(IllegalArgumentException.class, () ->
-                statisticService.getStats(LocalDateTime.now(), LocalDateTime.now().minusDays(3), new ArrayList<>(), false)
+                statisticService.getStats(LocalDateTime.now(), LocalDateTime.now().minusDays(3),
+                        new ArrayList<>(), false)
 
         );
 

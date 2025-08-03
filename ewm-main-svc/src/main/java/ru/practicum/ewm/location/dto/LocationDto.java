@@ -1,9 +1,11 @@
 package ru.practicum.ewm.location.dto;
 
 import jakarta.validation.constraints.NotNull;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 /**
  * DTO для передачи данных о местоположении.
@@ -12,15 +14,16 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class LocationDto {
     /**
      * Широта (latitude) в градусах.
      */
     @NotNull(message = "Поле latitude не может быть пустым")
-    private float lat;
+    float lat;
     /**
      * Долгота (longitude) в градусах.
      */
     @NotNull(message = "Поле longitude не может быть пустым")
-    private float lon;
+    float lon;
 }
