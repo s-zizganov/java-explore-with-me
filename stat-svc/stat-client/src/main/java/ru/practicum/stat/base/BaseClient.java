@@ -1,64 +1,78 @@
 package ru.practicum.stat.base;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
-
+import org.springframework.beans.factory.annotation.Value;
 import java.util.List;
 
 /**
  * Базовый клиент для выполнения HTTP-запросов к внешним сервисам через RestTemplate.
  * Предоставляет методы для отправки GET и POST запросов с обработкой ошибок и стандартными заголовками.
  */
+@Slf4j
 public class BaseClient {
 
     /**
      * RestTemplate для выполнения HTTP-запросов.
      */
-    protected final RestTemplate restTemplate;
+    protected final RestTemplate rest;
+    private final String statsUri;
 
     /**
      * Конструктор базового клиента.
      * @param rest RestTemplate, используемый для отправки запросов
      */
-    public BaseClient(RestTemplate rest) {
-        this.restTemplate = rest;
+    public BaseClient(RestTemplate rest,@Value("${stats-server.url}") String statsUri) {
+        this.rest = rest;
+        this.statsUri = statsUri;
     }
 
+
     /**
-     * Выполняет GET-запрос по указанному пути.
-     * @param path путь запроса
-     * @return ответ сервера
+     * Выполняет GET-запрос к сервису статистики по указанному пути.
+     * @param path путь для запроса
+     * @return ответ от сервиса статистики
      */
     protected ResponseEntity<Object> get(String path) {
-        return sendRequest(path);
+        return makeAndSendRequest(statsUri + path);
     }
 
     /**
-     * Выполняет POST-запрос с телом запроса по указанному пути.
+     * Выполняет POST-запрос к сервису статистики для отправки данных (например, информации о хите).
      * @param body тело запроса
-     * @param path путь запроса
-     * @return ответ сервера
+     * @return ответ от сервиса статистики
      */
-    protected ResponseEntity<Object> post(Object body, String path) {
+    protected ResponseEntity<Object> post(Object body) {
         HttpEntity<Object> requestEntity = new HttpEntity<>(body);
-        return restTemplate.postForEntity(path, requestEntity, Object.class);
+        try {
+            log.info("Отправка POST запроса на URL: {}, тело: {}", statsUri + "/hit", body);
+            ResponseEntity<Object> response = rest.postForEntity(statsUri + "/hit", requestEntity, Object.class);
+            log.info("Получен ответ от сервиса статистики, статус: {}", response.getStatusCode());
+            return response;
+        } catch (HttpStatusCodeException e) {
+            log.error("Ошибка при отправке POST запроса: {}, тело ответа: {}", e.getStatusCode(), e.getResponseBodyAsString());
+            return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsString());
+        }
     }
 
     /**
-     * Вспомогательный метод для выполнения GET-запроса с обработкой ошибок.
-     * @param path путь запроса
-     * @return ответ сервера
+     * Вспомогательный метод для отправки GET-запроса с обработкой ошибок.
+     * @param path полный путь для запроса
+     * @param <T> тип тела запроса (обычно null)
+     * @return ответ от сервиса статистики
      */
-    private <T> ResponseEntity<Object> sendRequest(String path) {
+    private <T> ResponseEntity<Object> makeAndSendRequest(String path) {
         HttpEntity<T> requestEntity = new HttpEntity<>(null, defaultHeaders());
-
         ResponseEntity<Object> responseEntity;
         try {
-            responseEntity = restTemplate.exchange(path, HttpMethod.GET, requestEntity, Object.class);
+            log.info("Отправка GET запроса на URL: {}", path);
+            responseEntity = rest.exchange(path, HttpMethod.GET, requestEntity, Object.class);
+            log.info("Получен ответ от сервиса статистики, статус: {}", responseEntity.getStatusCode());
         } catch (HttpStatusCodeException e) {
-            // В случае ошибки возвращаем статус и тело ошибки
-            return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsByteArray());
+            log.error("Ошибка при отправке GET запроса: {}, тело ответа: {}", e.getStatusCode(), e.getResponseBodyAsString());
+            return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsString());
         }
         return prepareResponse(responseEntity);
     }
