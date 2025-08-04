@@ -4,12 +4,14 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
- * Главный класс запуска Spring Boot приложения основного сервиса Explore With Me.
+ * Главный класс запуска Spring Boot приложения Explore With Me.
+ * Сканирует все необходимые пакеты и инициализирует приложение.
  */
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = {"ru.practicum.ewm", "ru.practicum.stat"})
 public class MainApp {
     /**
-     * Точка входа в приложение. Запускает Spring Boot приложение.
+     * Точка входа в приложение.
+     *
      * @param args аргументы командной строки
      */
     public static void main(String[] args) {
