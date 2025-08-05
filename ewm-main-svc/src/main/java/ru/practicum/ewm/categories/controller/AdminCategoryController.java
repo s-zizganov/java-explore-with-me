@@ -15,9 +15,13 @@ import ru.practicum.ewm.categories.service.CategoryService;
  */
 @Slf4j
 @RestController
-@RequestMapping("/admin/categories")
+@RequestMapping(AdminCategoryController.BASE_PATH)
 @RequiredArgsConstructor
 public class AdminCategoryController {
+
+    public static final String BASE_PATH = "/admin/categories";
+    public static final String CATEGORY_ID_PATH = "/{categoryId}";
+
 
     private final CategoryService categoryService;
 
@@ -39,7 +43,7 @@ public class AdminCategoryController {
      * @param dto данные для обновления категории
      * @return обновлённая категория
      */
-    @PatchMapping("/{categoryId}")
+    @PatchMapping(CATEGORY_ID_PATH)
     public Category modifyCategory(@PathVariable Long categoryId, @RequestBody @Valid CategoryDto dto) {
         log.info("Обновление категории с ID: {}", categoryId);
         return categoryService.update(categoryId, dto);
@@ -49,7 +53,7 @@ public class AdminCategoryController {
      * Удаляет категорию по её идентификатору.
      * @param categoryId идентификатор категории для удаления
      */
-    @DeleteMapping("/{categoryId}")
+    @DeleteMapping(CATEGORY_ID_PATH)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void removeCategory(@PathVariable Long categoryId) {
         log.info("Удаление категории с ID: {}", categoryId);
