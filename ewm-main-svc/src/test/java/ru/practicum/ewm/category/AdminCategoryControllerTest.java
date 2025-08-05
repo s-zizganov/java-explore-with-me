@@ -8,120 +8,122 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import ru.practicum.ewm.categories.repository.CategoryRepository;
-import ru.practicum.ewm.categories.contoller.AdminCategoryController;
+import ru.practicum.ewm.categories.controller.AdminCategoryController;
 import ru.practicum.ewm.categories.dto.CategoryDto;
 import ru.practicum.ewm.categories.model.Category;
+import ru.practicum.ewm.categories.repository.CategoryRepository;
 import ru.practicum.ewm.categories.service.CategoryService;
 import ru.practicum.ewm.exception.NotFoundException;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+/**
+ * Тесты для проверки функциональности AdminCategoryController.
+ */
 @WebMvcTest(AdminCategoryController.class)
-@DisplayName("Тестирование AdminCategoryController")
+@DisplayName("Тесты контроллера категорий для администраторов")
 public class AdminCategoryControllerTest {
 
     @Autowired
-    private MockMvc mockMvc;
+    private MockMvc mvc;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private ObjectMapper jsonMapper;
 
     @MockBean
-    private CategoryService categoryService;
+    private CategoryService catService;
 
     @MockBean
-    private CategoryRepository categoryRepository;
+    private CategoryRepository catRepository;
 
-    @DisplayName("Успешное создание категории")
     @Test
-    void createCategory_correctCategoryDto_shouldReturnCreated() throws Exception {
-        CategoryDto dto = new CategoryDto();
-        dto.setName("Books");
+    @DisplayName("Проверка успешного создания категории")
+    void testAddCategory_validInput_returnsCreatedStatus() throws Exception {
+        CategoryDto inputDto = new CategoryDto();
+        inputDto.setName("Literature");
 
-        Category createdCategory = new Category();
-        createdCategory.setId(1L);
-        createdCategory.setName("Books");
+        Category newCategory = new Category();
+        newCategory.setId(1L);
+        newCategory.setName("Literature");
 
-        when(categoryService.create(any(CategoryDto.class))).thenReturn(createdCategory);
+        when(catService.create(any(CategoryDto.class))).thenReturn(newCategory);
 
-        mockMvc.perform(post("/admin/categories")
+        mvc.perform(post("/admin/categories")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
+                        .content(jsonMapper.writeValueAsString(inputDto)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.name").value("Books"));
+                .andExpect(jsonPath("$.name").value("Literature"));
     }
 
-    @DisplayName("Создание категории с пустым названием должно вернуть ошибку валидации")
     @Test
-    void createCategory_emptyName_shouldReturnBadRequest() throws Exception {
-        CategoryDto dto = new CategoryDto();
-        dto.setName("");
+    @DisplayName("Проверка создания категории с пустым именем")
+    void testAddCategory_emptyName_returnsBadRequest() throws Exception {
+        CategoryDto inputDto = new CategoryDto();
+        inputDto.setName("");
 
-        mockMvc.perform(post("/admin/categories")
+        mvc.perform(post("/admin/categories")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
+                        .content(jsonMapper.writeValueAsString(inputDto)))
                 .andExpect(status().isBadRequest());
     }
 
-    @DisplayName("Создание категории с длинным названием (>50 символов)")
     @Test
-    void createCategory_tooLongName_shouldReturnBadRequest() throws Exception {
-        CategoryDto dto = new CategoryDto();
-        dto.setName("a".repeat(51)); // 51 символ
+    @DisplayName("Проверка создания категории с длинным именем")
+    void testAddCategory_overLengthName_returnsBadRequest() throws Exception {
+        CategoryDto inputDto = new CategoryDto();
+        inputDto.setName("x".repeat(51));
 
-        mockMvc.perform(post("/admin/categories")
+        mvc.perform(post("/admin/categories")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
+                        .content(jsonMapper.writeValueAsString(inputDto)))
                 .andExpect(status().isBadRequest());
     }
 
-    @DisplayName("Успешное обновление категории")
     @Test
-    void updateCategory_validData_shouldReturnUpdated() throws Exception {
-        CategoryDto dto = new CategoryDto();
-        dto.setName("Updated Name");
+    @DisplayName("Проверка успешного обновления категории")
+    void testUpdateCategory_validData_returnsOkStatus() throws Exception {
+        CategoryDto inputDto = new CategoryDto();
+        inputDto.setName("Modified Category");
 
-        Category updatedCategory = new Category();
-        updatedCategory.setId(1L);
-        updatedCategory.setName("Updated Name");
+        Category modifiedCategory = new Category();
+        modifiedCategory.setId(1L);
+        modifiedCategory.setName("Modified Category");
 
-        when(categoryService.update(eq(1L), any(CategoryDto.class))).thenReturn(updatedCategory);
+        when(catService.update(eq(1L), any(CategoryDto.class))).thenReturn(modifiedCategory);
 
-        mockMvc.perform(patch("/admin/categories/1")
+        mvc.perform(patch("/admin/categories/1")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
+                        .content(jsonMapper.writeValueAsString(inputDto)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.name").value("Updated Name"));
+                .andExpect(jsonPath("$.name").value("Modified Category"));
     }
 
-    @DisplayName("Удаление категории по ID")
     @Test
-    void deleteCategory_validId_shouldReturnNoContent() throws Exception {
-        doNothing().when(categoryService).delete(1L);
+    @DisplayName("Проверка удаления категории по ID")
+    void testRemoveCategory_validId_returnsNoContent() throws Exception {
+        doNothing().when(catService).delete(1L);
 
-        mockMvc.perform(delete("/admin/categories/1"))
+        mvc.perform(delete("/admin/categories/1"))
                 .andExpect(status().isNoContent());
     }
 
-    @DisplayName("Попытка обновить несуществующую категорию")
     @Test
-    void updateCategory_nonExistingId_shouldReturnNotFound() throws Exception {
-        CategoryDto dto = new CategoryDto();
-        dto.setName("Updated Name");
+    @DisplayName("Проверка обновления несуществующей категории")
+    void testUpdateCategory_invalidId_returnsNotFound() throws Exception {
+        CategoryDto inputDto = new CategoryDto();
+        inputDto.setName("Modified Category");
 
-        doThrow(new NotFoundException("Категория с id=999 не найдена"))
-                .when(categoryService).update(eq(999L), any(CategoryDto.class));
+        doThrow(new NotFoundException("Категория с ID 999 не найдена"))
+                .when(catService).update(eq(999L), any(CategoryDto.class));
 
-        mockMvc.perform(patch("/admin/categories/999")
+        mvc.perform(patch("/admin/categories/999")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
+                        .content(jsonMapper.writeValueAsString(inputDto)))
                 .andExpect(status().isNotFound());
     }
 }

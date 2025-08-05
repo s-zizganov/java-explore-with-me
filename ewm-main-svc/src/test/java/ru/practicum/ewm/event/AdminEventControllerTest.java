@@ -70,7 +70,7 @@ public class AdminEventControllerTest {
         when(eventService.findAllByAdmin(any(EventSearchDto.class), any(HttpServletRequest.class)))
                 .thenReturn(events);
 
-       mockMvc.perform(get("/admin/events")
+        mockMvc.perform(get("/admin/events")
                         .contentType(MediaType.APPLICATION_JSON)
                         .param("text", "concert")
                         .param("categories", "1", "2")
@@ -144,7 +144,7 @@ public class AdminEventControllerTest {
                 .state(EventState.PUBLISHED)
                 .createdOn(LocalDateTime.now().minusDays(1))
                 .publishedOn(LocalDateTime.now())
-                .initiator(new UserShortDto(1L, "User Name"))
+                .initiator(new UserShortDto(1L, "User Name", true))
                 .category(new CategoryDto("Category Name"))
                 .views(1000L)
                 .confirmedRequests(500L)

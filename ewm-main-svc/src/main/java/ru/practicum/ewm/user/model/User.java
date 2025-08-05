@@ -33,4 +33,7 @@ public class User {
      */
     @Column(nullable = false, unique = true, length = 254)
     String email;
+
+    @Column(name = "allow_subscriptions", nullable = false)
+    boolean allowSubscriptions = true;
 }

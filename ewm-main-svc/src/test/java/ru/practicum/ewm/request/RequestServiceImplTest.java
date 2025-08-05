@@ -51,7 +51,7 @@ public class RequestServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        User user1 = new User(null, "Test User 1", "user1@example.com");
+        User user1 = new User(null, "Test User 1", "user1@example.com", true);
         user1 = userRepository.save(user1);
         userId = user1.getId();
 
@@ -88,7 +88,7 @@ public class RequestServiceImplTest {
     @Test
     @DisplayName("Создание запроса: уже есть заявка")
     void create_RequestAlreadyExists_throwsConflictException() {
-        User user2 = new User(null, "Test User 2", "user2@example.com");
+        User user2 = new User(null, "Test User 2", "user2@example.com", true);
         user2 = userRepository.save(user2);
         Long secondUserId = user2.getId();
 
@@ -119,11 +119,11 @@ public class RequestServiceImplTest {
     @Test
     @DisplayName("Создание запроса: достигнут лимит участников")
     void create_ParticipantLimitReached_throwsConflictException() {
-        User user2 = new User(null, "Test User 2", "user2@example.com");
+        User user2 = new User(null, "Test User 2", "user2@example.com", true);
         user2 = userRepository.save(user2);
         Long secondUserId = user2.getId();
 
-        User user3 = new User(null, "Test User 3", "user3@example.com");
+        User user3 = new User(null, "Test User 3", "user3@example.com", true);
         user3 = userRepository.save(user3);
         Long thirdUserId = user3.getId();
 
@@ -143,7 +143,7 @@ public class RequestServiceImplTest {
     @Test
     @DisplayName("Создание запроса: успешно")
     void create_Success() {
-        User user2 = new User(null, "Test User 2", "user2@example.com");
+        User user2 = new User(null, "Test User 2", "user2@example.com", true);
         user2 = userRepository.save(user2);
         Long secondUserId = user2.getId();
 
@@ -246,7 +246,7 @@ public class RequestServiceImplTest {
     @Test
     @DisplayName("Получение заявок события: успешно")
     void getParticipationRequestsForUserEvent_Success() {
-        User user2 = new User(null, "Test User 2", "user2@example.com");
+        User user2 = new User(null, "Test User 2", "user2@example.com", true);
         user2 = userRepository.save(user2);
         Long secondUserId = user2.getId();
 
@@ -278,10 +278,10 @@ public class RequestServiceImplTest {
     @Test
     @DisplayName("Обновление статуса заявок: лимит участников достигнут")
     void updateStatus_ParticipantLimitReached_throwsConflictException() {
-        User user2 = new User(null, "Test User 2", "user2@example.com");
+        User user2 = new User(null, "Test User 2", "user2@example.com", true);
         user2 = userRepository.save(user2);
 
-        User user3 = new User(null, "Test User 3", "user3@example.com");
+        User user3 = new User(null, "Test User 3", "user3@example.com", true);
         user3 = userRepository.save(user3);
 
         Event event = eventRepository.findById(eventId).orElseThrow();
@@ -307,10 +307,10 @@ public class RequestServiceImplTest {
     @Test
     @DisplayName("Обновление статуса заявок: запрос не относится к событию")
     void updateStatus_RequestNotRelatedToEvent_throwsNotFoundException() {
-        User user2 = new User(null, "Test User 2", "user2@example.com");
+        User user2 = new User(null, "Test User 2", "user2@example.com", true);
         user2 = userRepository.save(user2);
 
-        User user3 = new User(null, "Test User 3", "user3@example.com");
+        User user3 = new User(null, "Test User 3", "user3@example.com", true);
         user3 = userRepository.save(user3);
 
         Event event = new Event();
@@ -335,7 +335,7 @@ public class RequestServiceImplTest {
     @Test
     @DisplayName("Обновление статуса заявок: заявка не в статусе PENDING")
     void updateStatus_RequestNotPending_throwsConflictException() {
-        User user2 = new User(null, "Test User 2", "user2@example.com");
+        User user2 = new User(null, "Test User 2", "user2@example.com", true);
         user2 = userRepository.save(user2);
 
         Event event = eventRepository.findById(eventId).orElseThrow();
@@ -354,7 +354,7 @@ public class RequestServiceImplTest {
     @Test
     @DisplayName("Обновление статуса заявок: успешно")
     void updateStatus_Success() {
-        User user2 = new User(null, "Test User 2", "user2@example.com");
+        User user2 = new User(null, "Test User 2", "user2@example.com", true);
         user2 = userRepository.save(user2);
 
         Event event = eventRepository.findById(eventId).orElseThrow();
