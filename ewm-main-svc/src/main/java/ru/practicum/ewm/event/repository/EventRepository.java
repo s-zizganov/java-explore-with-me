@@ -90,4 +90,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
      * @return страница событий
      */
     Page<Event> findAll(Specification<Event> spec, Pageable pageable);
+
+    List<Event> findByInitiatorIdIn(List<Long> initiatorIds, Pageable pageable);
+
 }

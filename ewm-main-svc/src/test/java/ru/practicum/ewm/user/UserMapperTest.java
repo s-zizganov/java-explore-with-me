@@ -37,7 +37,7 @@ public class UserMapperTest {
     @DisplayName("Преобразовать корректный User в UserShortDto")
     @Test
     void toUser_allUserFieldsFilled_returnCorrectUserShortDto() {
-        User user = new User(1L, "User name", "User@mail.ru");
+        User user = new User(1L, "User name", "User@mail.ru", true);
         UserShortDto shortDto = userMapper.toShortDto(user);
         assertEquals(user.getName(), shortDto.getName());
         assertEquals(user.getId(), shortDto.getId());

@@ -19,6 +19,7 @@ public interface UserMapper {
      * @return сущность User
      */
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "allowSubscriptions", ignore = true)
     User toUser(UserCreateDto userCreateDto);
 
     /**

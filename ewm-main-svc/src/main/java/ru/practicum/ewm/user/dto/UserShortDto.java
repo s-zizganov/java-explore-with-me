@@ -23,4 +23,6 @@ public class UserShortDto {
      * Имя пользователя.
      */
     String name;
+
+    boolean allowSubscriptions;
 }

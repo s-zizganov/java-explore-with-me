@@ -8,7 +8,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import ru.practicum.ewm.categories.contoller.PublicCategoryController;
+import ru.practicum.ewm.categories.controller.PublicCategoryController;
 import ru.practicum.ewm.categories.model.Category;
 import ru.practicum.ewm.categories.service.CategoryService;
 import ru.practicum.ewm.exception.NotFoundException;
@@ -22,48 +22,21 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(PublicCategoryController.class)
-@DisplayName("Тестирование PublicCategoryController")
+@DisplayName("Тестирование контроллера публичных категорий")
 public class PublicCategoryControllerTest {
 
     @Autowired
-    private MockMvc mockMvc;
+    private MockMvc client;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private ObjectMapper mapper;
 
     @MockBean
-    private CategoryService categoryService;
+    private CategoryService service;
 
-    @DisplayName("Получение категории по ID")
+    @DisplayName("Получение категорий с корректной пагинацией")
     @Test
-    void getCategoryById_validId_shouldReturnCategory() throws Exception {
-        Category category = new Category();
-        category.setId(1L);
-        category.setName("Books");
-
-        when(categoryService.getCategoryById(1L)).thenReturn(category);
-
-        mockMvc.perform(get("/categories/1")
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.name").value("Books"));
-    }
-
-    @DisplayName("Попытка получить несуществующую категорию")
-    @Test
-    void getCategoryById_nonExistingId_shouldReturnNotFound() throws Exception {
-        doThrow(new NotFoundException("Категория с id=999 не найдена"))
-                .when(categoryService).getCategoryById(999L);
-
-        mockMvc.perform(get("/categories/999")
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound());
-    }
-
-    @DisplayName("Получение всех категорий с пагинацией")
-    @Test
-    void getAllCategories_withValidPagination_shouldReturnListOfCategories() throws Exception {
+    void getCategories_validParams_returnsList() throws Exception {
         Category category1 = new Category();
         category1.setId(1L);
         category1.setName("Books");
@@ -74,9 +47,9 @@ public class PublicCategoryControllerTest {
 
         List<Category> categories = List.of(category1, category2);
 
-        when(categoryService.getAllCategories(0, 10)).thenReturn(categories);
+        when(service.getAllCategories(0, 10)).thenReturn(categories);
 
-        mockMvc.perform(get("/categories")
+        client.perform(get("/categories")
                         .param("from", "0")
                         .param("size", "10")
                         .accept(MediaType.APPLICATION_JSON))
@@ -88,16 +61,43 @@ public class PublicCategoryControllerTest {
                 .andExpect(jsonPath("$[1].name").value("Electronics"));
     }
 
-    @DisplayName("Запрос без параметров пагинации должен использовать значения по умолчанию")
+    @DisplayName("Получение категории по валидному ID")
     @Test
-    void getAllCategories_withoutParams_shouldUseDefaultPagination() throws Exception {
+    void getCategory_validId_returnsCategory() throws Exception {
         Category category = new Category();
         category.setId(1L);
         category.setName("Books");
 
-        when(categoryService.getAllCategories(0, 10)).thenReturn(List.of(category));
+        when(service.getCategoryById(1L)).thenReturn(category);
 
-        mockMvc.perform(get("/categories")
+        client.perform(get("/categories/1")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1L))
+                .andExpect(jsonPath("$.name").value("Books"));
+    }
+
+    @DisplayName("Запрос категории с несуществующим ID возвращает ошибку")
+    @Test
+    void getCategory_invalidId_returnsNotFound() throws Exception {
+        doThrow(new NotFoundException("Категория с id=999 не найдена"))
+                .when(service).getCategoryById(999L);
+
+        client.perform(get("/categories/999")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
+
+    @DisplayName("Получение категорий с параметрами пагинации по умолчанию")
+    @Test
+    void getCategories_defaultParams_appliesDefaultPagination() throws Exception {
+        Category category = new Category();
+        category.setId(1L);
+        category.setName("Books");
+
+        when(service.getAllCategories(0, 10)).thenReturn(List.of(category));
+
+        client.perform(get("/categories")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1))
@@ -105,20 +105,20 @@ public class PublicCategoryControllerTest {
                 .andExpect(jsonPath("$[0].name").value("Books"));
     }
 
-    @DisplayName("Параметр from отрицательный — должен вернуть ошибку")
+    @DisplayName("Отрицательный параметр from вызывает ошибку")
     @Test
-    void getAllCategories_negativeFrom_shouldReturnBadRequest() throws Exception {
-        mockMvc.perform(get("/categories")
+    void getCategories_negativeFrom_returnsBadRequest() throws Exception {
+        client.perform(get("/categories")
                         .param("from", "-5")
                         .param("size", "10")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
     }
 
-    @DisplayName("Параметр size неположительный — должен вернуть ошибку")
+    @DisplayName("Неположительный параметр size вызывает ошибку")
     @Test
-    void getAllCategories_nonPositiveSize_shouldReturnBadRequest() throws Exception {
-        mockMvc.perform(get("/categories")
+    void getCategories_nonPositiveSize_returnsBadRequest() throws Exception {
+        client.perform(get("/categories")
                         .param("from", "0")
                         .param("size", "0")
                         .accept(MediaType.APPLICATION_JSON))
